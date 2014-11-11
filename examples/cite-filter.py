@@ -6,7 +6,7 @@ Pandoc filter to citeproc-py.
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import sys
-sys.path.insert(0, '../')
+sys.path.insert(0, '../') # just handy for testing
 from citeproc.py2compat import *
 
 # The references are parsed from a BibTeX database, so we import the
@@ -25,11 +25,11 @@ import logging
 # Parse the BibTeX database.
 
 bib_source = BibTeX('ascii.bib')
+# TODO: use the metadata passed by Pandoc that might include a path to a bibiliography file or a CSL style (below)
 
 # load a CSL style (from the current directory)
 
 bib_style = CitationStylesStyle('/Users/nick/.pandoc/pandoc-templates/csl/' + 'apsa.csl', validate=False)
-
 
 # Create the citeproc-py bibliography, passing it the:
 # * CitationStylesStyle,
@@ -38,6 +38,8 @@ bib_style = CitationStylesStyle('/Users/nick/.pandoc/pandoc-templates/csl/' + 'a
 
 bibliography = CitationStylesBibliography(bib_style, bib_source,
                                           formatter.html)
+# TODO: choose formatter based on target output format of the pandoc command
+# ... and pass that value through to the RawInline and RawBlock commands
 
 citations = []
 counter = 0
@@ -49,13 +51,6 @@ def citation_register(key, value, format, meta):
         citations.append(citation)
 
 def citation_replace(key, value, format, meta):
-    if key == 'Cite':
-        global counter
-        citation = citations[counter]
-        counter = counter + 1
-        return Cite(value[0], [RawInline('html', bibliography.cite(citation, None))])
-
-def add_bibliography(key, value, format, meta):
     if key == 'Cite':
         global counter
         citation = citations[counter]
@@ -76,6 +71,6 @@ if __name__ == "__main__":
     for item in bibliography.bibliography():
         references.append(Para([RawInline('html', str(item))]))
         
-    second[1].extend(references)
+    second[1].extend(references) # add more paragraphs to the end of the main document list of blocks
     
     json.dump(second, sys.stdout)
