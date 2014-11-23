@@ -17,6 +17,18 @@ should not expect to see any major API changes soon.
 .. _semantic versioning: http://semver.org/
 
 
+This Fork
+---------
+
+This fork of citeproc-py is a place to work on two general features:
+
+- support semantic tagging with attributes, especially for HTML output (schema.org or microformats tagging of author, title, etc.)
+- script to enable use as a `Pandoc`_ filter
+
+Contact npdoty if you have questions or want to contribute.
+
+.. _Pandoc: http://johnmacfarlane.net/pandoc/scripting.html
+
 Requirements
 ------------
 
