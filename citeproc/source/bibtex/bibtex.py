@@ -28,6 +28,7 @@ class BibTeX(BibliographySource):
 #              'howpublished': None,
 #              'institution': None,
               'journal': 'container_title',
+              'journaltitle': 'container_title',
 #              'month': None,
               'note': 'note',
               'number': 'issue',
