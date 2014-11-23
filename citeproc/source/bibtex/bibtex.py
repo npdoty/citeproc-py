@@ -62,8 +62,8 @@ class BibTeX(BibliographySource):
              'report': REPORT,
              'unpublished': MANUSCRIPT}
 
-    def __init__(self, filename):
-        bibtex_database = BibTeXParser(filename)
+    def __init__(self, filename, encoding='ascii'):
+        bibtex_database = BibTeXParser(filename, encoding)
         self.preamble_macros = {}
         parse_latex(bibtex_database.preamble,
                     {'newcommand': NewCommand(self.preamble_macros),
