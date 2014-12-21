@@ -48,6 +48,11 @@ JSON representation of references as supported by citeproc-js, another
 parsing the references from a BibTeX file. Both show and explain how to
 cite references and render the bibliography.
 
+To use as a Pandoc filter, run something like the following in ``examples/``:
+
+``pandoc sample.mdown -f markdown -s -t html5 --filter cite-filter.py``
+
+Your input file will need ``bibliography`` and ``csl`` metadata (or pass those as additional parameters to pandoc).
 
 CSL Compatibility
 -----------------
