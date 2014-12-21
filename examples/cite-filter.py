@@ -5,9 +5,8 @@ Pandoc filter to citeproc-py.
 """
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
-import sys
-sys.path.insert(0, '../') # just handy for testing
 from citeproc.py2compat import *
+import sys
 
 # The references are parsed from a BibTeX database, so we import the
 # corresponding parser.
@@ -22,28 +21,6 @@ from pandocfilters import walk, RawInline, RawBlock, Cite, Span, Para, Div, attr
 import json
 import logging
 
-# Parse the BibTeX database.
-
-bib_source = BibTeX('ascii.bib')
-# TODO: use the metadata passed by Pandoc that might include a path to a bibiliography file or a CSL style (below)
-
-# load a CSL style (from the current directory)
-
-bib_style = CitationStylesStyle('/Users/nick/.pandoc/pandoc-templates/csl/' + 'apsa.csl', validate=False)
-
-# Create the citeproc-py bibliography, passing it the:
-# * CitationStylesStyle,
-# * BibliographySource (BibTeX in this case), and
-# * a formatter (plain, html, or you can write a custom formatter)
-
-bibliography = CitationStylesBibliography(bib_style, bib_source,
-                                          formatter.html)
-# TODO: choose formatter based on target output format of the pandoc command
-# ... and pass that value through to the RawInline and RawBlock commands
-
-citations = []
-counter = 0
-
 def citation_register(key, value, format, meta):
     if key == 'Cite':
         citation = Citation([CitationItem(value[0][0]['citationId'])])
@@ -57,6 +34,9 @@ def citation_replace(key, value, format, meta):
         counter = counter + 1
         return Cite(value[0], [RawInline('html', bibliography.cite(citation, None))])
 
+def value_of_metadata(result):
+    return result['c'][0]['c']
+
 if __name__ == "__main__":
     # follows the basic model of pandocfilters toJSONFilter, but we do multiple passes
     doc = json.loads(sys.stdin.read())
@@ -64,6 +44,35 @@ if __name__ == "__main__":
         format = sys.argv[1]
     else:
         format = ""
+    
+    citations = []
+    counter = 0
+    bibliography_path = None
+    csl_path = None
+    
+    meta = doc[0]['unMeta']
+    
+    result = meta.get('bibliography', {})
+    if result:
+        bibliography_path = value_of_metadata(result)
+    result = meta.get('csl', {})
+    if result:
+        csl_path = value_of_metadata(result)
+    
+    if bibliography_path == None or csl_path == None:
+        raise Exception('Metadata variables must be set for both bibliography and csl.')
+    
+    # Parse the BibTeX database.
+    bib_source = BibTeX(bibliography_path, encoding='utf-8')
+
+    # load a CSL style
+    bib_style = CitationStylesStyle(csl_path, validate=False)
+
+    bibliography = CitationStylesBibliography(bib_style, bib_source,
+                                              formatter.html)
+    # TODO: choose formatter based on target output format of the pandoc command
+    # ... and pass that value through to the RawInline and RawBlock commands
+        
     altered = walk(doc, citation_register, format, doc[0]['unMeta'])
     second = walk(altered, citation_replace, format, doc[0]['unMeta'])
     
