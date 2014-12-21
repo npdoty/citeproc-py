@@ -765,9 +765,18 @@ class Text(CitationStylesElement, Formatted, Affixed, Quoted, TextCased,
             tmp = self.format(self.case(self.strip_periods(text), language))
             
             if 'variable' in self.attrib:
-                variables = {'class':self.get('variable')}
+                variable = self.get('variable')
+                variables = {'class':variable}
                 formatter = self.get_formatter()
-                tmp = formatter.Span(tmp, attributes=variables)
+                
+                tag = formatter.Span
+                
+                if variable == 'URL':
+                    if formatter.Url:
+                        tag = formatter.Url
+                        variables.update({'href':text})                        
+                
+                tmp = tag(tmp, attributes=variables)
             
             return self.wrap(self.quote(tmp))
         else:

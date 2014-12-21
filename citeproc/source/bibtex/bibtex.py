@@ -41,6 +41,8 @@ class BibTeX(BibliographySource):
 #              'type': None,
 #              'year': None,
               'volume': 'volume',
+              'URL': 'URL',
+              'url': 'URL',
 
               # non-standard fields
               'isbn': 'ISBN',

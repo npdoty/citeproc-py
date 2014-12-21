@@ -42,6 +42,9 @@ class TagWrapper(str):
 class Span(TagWrapper):
     pass
 
+class Url(TagWrapper):
+    tag = 'a'
+
 class Italic(TagWrapper):
     tag = 'i'
 
