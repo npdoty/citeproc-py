@@ -7,6 +7,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 from citeproc.py2compat import *
 import sys
+import functools
 
 # The references are parsed from a BibTeX database, so we import the
 # corresponding parser.
@@ -17,7 +18,7 @@ from citeproc import CitationStylesStyle, CitationStylesBibliography
 from citeproc import formatter
 from citeproc import Citation, CitationItem
 
-from pandocfilters import walk, RawInline, RawBlock, Cite, Span, Para, Div, attributes
+from pandocfilters import walk, RawInline, RawBlock, Cite, Span, Str, Para, Div, attributes
 import json
 import logging
 
@@ -32,7 +33,7 @@ def citation_replace(key, value, format, meta):
         global counter
         citation = citations[counter]
         counter = counter + 1
-        return Cite(value[0], [RawInline('html', bibliography.cite(citation, None))])
+        return Cite(value[0], [render(bibliography.cite(citation, None))])
 
 def value_of_metadata(result):
     return result['c'][0]['c']
@@ -44,6 +45,16 @@ if __name__ == "__main__":
         format = sys.argv[1]
     else:
         format = ""
+    
+    if format in ['html', 'html5']:
+        f = formatter.html
+        render = functools.partial(RawInline, 'html')
+    elif format == 'rst':
+        f = formatter.rst
+        render = Str
+    else:
+        f = formatter.plain
+        render = Str
     
     citations = []
     counter = 0
@@ -67,18 +78,16 @@ if __name__ == "__main__":
 
     # load a CSL style
     bib_style = CitationStylesStyle(csl_path, validate=False)
-
-    bibliography = CitationStylesBibliography(bib_style, bib_source,
-                                              formatter.html)
-    # TODO: choose formatter based on target output format of the pandoc command
-    # ... and pass that value through to the RawInline and RawBlock commands
+    
+    bibliography = CitationStylesBibliography(bib_style, bib_source, f)
         
     altered = walk(doc, citation_register, format, doc[0]['unMeta'])
     second = walk(altered, citation_replace, format, doc[0]['unMeta'])
     
     references = []
-    for item in bibliography.bibliography():
-        references.append(Para([RawInline('html', str(item))]))
+    for item, key in zip(bibliography.bibliography(), bibliography.keys):
+        attrs = {'id': key}
+        references.append(Div(attributes(attrs),[Para([render(str(item))])]))
         
     second[1].extend(references) # add more paragraphs to the end of the main document list of blocks
     

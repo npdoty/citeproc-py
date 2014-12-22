@@ -772,7 +772,7 @@ class Text(CitationStylesElement, Formatted, Affixed, Quoted, TextCased,
                 tag = formatter.Span
                 
                 if variable == 'URL':
-                    if formatter.Url:
+                    if hasattr(formatter, 'Url'):
                         tag = formatter.Url
                         variables.update({'href':text})                        
                 
