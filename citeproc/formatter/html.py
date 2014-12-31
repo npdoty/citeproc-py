@@ -16,22 +16,43 @@ def preformat(text):
 class TagWrapper(str):
     tag = None
     attributes = None
+    datetime_classes = ['issued', 'accessed', 'event-date', 'original-date', 'submitted']
 
     @classmethod
     def _wrap(cls, text, attributes=None):
+        tag = cls.tag or 'span'
+        
         if attributes == None:
             attributes = {}
             
         if cls.attributes:
             attributes.update(cls.attributes)
         
+        class_value = attributes.get('class', None)
+        
+        if class_value:        
+            if class_value in cls.datetime_classes:
+                tag = 'time'
+                if class_value == 'issued':
+                    attributes['class'] = 'dt-published'
+                if class_value == 'accessed':
+                    attributes['class'] = 'dt-accessed'
+        
+            if class_value == 'title':
+                tag = 'cite'
+                attributes['class'] = 'p-name'
+        
+            if class_value == 'author':
+                attributes['class'] = 'p-author'
+                        
+        if tag == 'a':
+            attributes['class'] = 'u-url'
+        
         if attributes:
             attrib = ' ' + ' '.join(['{}="{}"'.format(key, value)
                                      for key, value in attributes.items()])
         else:
             attrib = ''
-        
-        tag = cls.tag or 'span'
         
         return '<{tag}{attrib}>{text}</{tag}>'.format(tag=tag,
                                                       attrib=attrib,text=text)

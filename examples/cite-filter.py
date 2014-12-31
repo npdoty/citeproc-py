@@ -86,7 +86,7 @@ if __name__ == "__main__":
     
     references = []
     for item, key in zip(bibliography.bibliography(), bibliography.keys):
-        attrs = {'id': key}
+        attrs = {'id': key, 'class':'h-cite'}
         references.append(Div(attributes(attrs),[Para([render(str(item))])]))
         
     second[1].extend(references) # add more paragraphs to the end of the main document list of blocks
