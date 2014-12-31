@@ -899,10 +899,16 @@ class Date(CitationStylesElement, Parent, Formatted, Affixed, Delimited):
                     pass
         return output
 
-    def markup(self, text):
-        # TODO: fix
+    def markup(self, text):        
+        if 'variable' in self.attrib:
+            variable = self.get('variable')
+            variables = {'class':variable}
+            formatter = self.get_formatter()
+            
+            tag = formatter.Span            
+            text = tag(text, attributes=variables)
+        
         return text
-
 
 class Date_Part(CitationStylesElement, Formatted, Affixed, TextCased,
                 StrippedPeriods):
