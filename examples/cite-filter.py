@@ -33,10 +33,15 @@ def citation_replace(key, value, format, meta):
         global counter
         citation = citations[counter]
         counter = counter + 1
-        return Cite(value[0], [render(bibliography.cite(citation, None))])
+        return Cite(value[0], [render(bibliography.cite(citation, logging.warn))])
 
 def value_of_metadata(result):
-    return result['c'][0]['c']
+    result_value = result['c']
+    
+    if isinstance(result_value, basestring):    # sometimes the value is a string (if passed as cli argument)
+        return result_value
+    else:
+        return result_value[0]['c']     # other times it's a string inside an array (if in YAML)
 
 if __name__ == "__main__":
     # follows the basic model of pandocfilters toJSONFilter, but we do multiple passes
