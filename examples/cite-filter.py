@@ -71,7 +71,12 @@ if __name__ == "__main__":
     bibliography_path = None
     csl_path = None
     
-    meta = doc[0]['unMeta']
+    if 'meta' in doc:
+        meta = doc['meta']
+    elif doc[0]:  # old API
+        meta = doc[0]['unMeta']
+    else:
+        meta = {}
     
     result = meta.get('bibliography', {})
     if result:
@@ -91,14 +96,14 @@ if __name__ == "__main__":
     
     bibliography = CitationStylesBibliography(bib_style, bib_source, f)
         
-    altered = walk(doc, citation_register, format, doc[0]['unMeta'])
-    second = walk(altered, citation_replace, format, doc[0]['unMeta'])
+    altered = walk(doc, citation_register, format, meta)
+    second = walk(altered, citation_replace, format, meta)
     
     references = []
     for item, key in zip(bibliography.bibliography(), bibliography.keys):
         attrs = {'id': key, 'class':'h-cite'}
         references.append(Div(attributes(attrs),[Para([render(str(item))])]))
-        
-    second[1].extend(references) # add more paragraphs to the end of the main document list of blocks
+
+    second['blocks'].extend(references) # add more paragraphs to the end of the main document list of blocks
     
     json.dump(second, sys.stdout)
