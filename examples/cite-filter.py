@@ -33,7 +33,12 @@ def citation_replace(key, value, format, meta):
         global counter
         citation = citations[counter]
         counter = counter + 1
-        return Cite(value[0], [render(bibliography.cite(citation, logging.warn))])
+        bib_citation = bibliography.cite(citation, logging.warn)
+        if isinstance(bib_citation, basestring):
+          rendered_citation = render(bib_citation)
+        else:
+          rendered_citation = render(''.join(bib_citation)) # important if there's an "et al.", for example
+        return Cite(value[0], [rendered_citation])
 
 def value_of_metadata(result):
     result_value = result['c']
